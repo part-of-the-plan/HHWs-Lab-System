@@ -1,0 +1,37 @@
+# docker-compose.dev.yml —— 开发期只跑 MySQL + Redis
+# 应用代码不进 Docker，裸跑在本机连 localhost:3306 / localhost:6379
+services:
+  db:
+    image: mysql:8.0
+    container_name: lab_dev_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: devroot123        # 仅本地开发用，上云换强密码
+      MYSQL_DATABASE: lab_device_db
+      MYSQL_USER: lab_user
+      MYSQL_PASSWORD: lab_pass123
+    command:
+      - --character-set-server=utf8mb4         # 方案要求的字符集
+      - --collation-server=utf8mb4_general_ci
+    ports:
+      - "3306:3306"                            # 映射到本机，Flask 连 localhost:3306
+    volumes:
+      - mysql_dev_data:/var/lib/mysql          # 数据持久化，容器删了数据还在
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pdevroot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: lab_dev_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"                            # Flask 连 localhost:6379
+    volumes:
+      - redis_dev_data:/data
+
+volumes:
+  mysql_dev_data:
+  redis_dev_data:
