@@ -8,7 +8,7 @@ import base64
 from flask import Blueprint, request, current_app, g
 from flask_jwt_extended import create_access_token, get_jwt_identity
 
-from app.extensions import db, redis_client
+from app.extensions import db, redis_client, limiter
 from app.models import User, Role, UserRole
 from app.utils.crypto import hash_password, verify_password, encrypt_field
 from app.utils.response import success, error
@@ -50,6 +50,7 @@ def get_captcha():
 # ==================== 注册 ====================
 
 @auth_bp.post("/register")
+@limiter.limit("3 per minute")  # 防止恶意批量注册
 def register():
     data = request.get_json(silent=True) or {}
 
@@ -129,6 +130,7 @@ def register():
 # ==================== 登录 ====================
 
 @auth_bp.post("/login")
+@limiter.limit("5 per minute")  # 防暴力破解（配合失败锁定双层保护）
 def login():
     data = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()

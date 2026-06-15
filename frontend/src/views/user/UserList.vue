@@ -59,6 +59,8 @@
         </el-table-column>
       </el-table>
 
+      <el-empty v-if="!loading && list.length===0" description="暂无用户数据" />
+
       <el-pagination
         v-model:current-page="pager.page" v-model:page-size="pager.per_page"
         :total="pager.total" :page-sizes="[10, 20]" layout="total, sizes, prev, pager, next"

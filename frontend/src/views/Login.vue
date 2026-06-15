@@ -4,11 +4,12 @@
       <h2 style="text-align:center;margin-bottom:24px">实验室设备管理系统</h2>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="0" size="large">
         <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名" prefix-icon="User" />
+          <el-input v-model="form.username" placeholder="用户名" prefix-icon="User"
+            autocomplete="username" />
         </el-form-item>
         <el-form-item prop="password">
           <el-input v-model="form.password" type="password" placeholder="密码"
-            prefix-icon="Lock" show-password />
+            prefix-icon="Lock" show-password autocomplete="new-password" />
         </el-form-item>
         <el-form-item>
           <div style="display:flex;gap:8px;align-items:center">

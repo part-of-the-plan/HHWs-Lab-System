@@ -48,6 +48,15 @@
           <el-button text @click="doLogout">退出登录</el-button>
         </div>
       </el-header>
+      <!-- 面包屑导航 -->
+      <div v-if="breadcrumbs.length > 1" class="breadcrumb-bar">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path"
+            :to="item.path" style="cursor:pointer">
+            {{ item.title }}
+          </el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
       <el-main>
         <router-view />
       </el-main>
@@ -67,6 +76,29 @@ const route = useRoute()
 const router = useRouter()
 const isCollapse = ref(false)
 const activePath = computed(() => route.path)
+
+/** 面包屑：根据当前路径从 menuMap 解析层级 */
+const PATH_MAP = (() => {
+  const map = {}
+  for (const [key, menu] of Object.entries(menuMap)) {
+    if (menu.children) {
+      for (const child of menu.children) {
+        map[child.path] = { title: child.title, parent: menu.title }
+      }
+    }
+  }
+  return map
+})()
+const breadcrumbs = computed(() => {
+  const path = route.path
+  const crumbs = [{ title: '首页', path: '/' }]
+  if (path === '/') return crumbs
+  const entry = PATH_MAP[path]
+  if (!entry) return crumbs
+  crumbs.push({ title: entry.parent, path: '' })
+  crumbs.push({ title: entry.title, path })
+  return crumbs
+})
 
 /** 根据权限过滤菜单 */
 const sideMenus = computed(() => {
@@ -102,4 +134,5 @@ function doLogout() {
   border-bottom:1px solid rgba(255,255,255,0.1); }
 .header { display:flex; align-items:center; justify-content:space-between;
   background:#fff; border-bottom:1px solid #e6e6e6; height:60px; }
+.breadcrumb-bar { padding:12px 20px; background:#fff; border-bottom:1px solid #eee; }
 </style>

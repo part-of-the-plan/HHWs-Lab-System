@@ -24,6 +24,13 @@ def create_app(config_class=None):
     jwt.init_app(app)
     init_redis(app)
 
+    # 接口限流：用 Redis 做计数器，Gunicorn 多 worker 共享
+    from .extensions import limiter
+    app.config["RATELIMIT_STORAGE_URI"] = (
+        f"redis://{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}"
+    )
+    limiter.init_app(app)
+
     # ── CORS：生产按 .env 的 CORS_ORIGINS 白名单收紧，开发放开 ──
     origins = app.config.get("CORS_ORIGINS", "")
     if app.config.get("IS_PRODUCTION") and origins:
@@ -66,6 +73,32 @@ def create_app(config_class=None):
     # ── 注册中间件 ──
     from .middlewares.auth_middleware import register_auth_middleware
     register_auth_middleware(app)
+
+    # ── 全局错误处理器：未捕获异常统一返回 JSON，而非 HTML 错误页 ──
+    from .utils.response import error as _json_error
+
+    @app.errorhandler(400)
+    def _bad_request(e):
+        return _json_error("请求参数有误", code=400, http_status=400)
+
+    @app.errorhandler(401)
+    def _unauthorized(e):
+        return _json_error("未登录或登录已过期", code=401, http_status=401)
+
+    @app.errorhandler(403)
+    def _forbidden(e):
+        return _json_error("无此操作权限", code=403, http_status=403)
+
+    @app.errorhandler(404)
+    def _not_found(e):
+        return _json_error("接口不存在", code=404, http_status=404)
+
+    @app.errorhandler(500)
+    def _server_error(e):
+        # 生产不暴露 traceback；开发暴露错误信息方便调试
+        if app.config.get("IS_PRODUCTION"):
+            return _json_error("服务器内部错误", code=500, http_status=500)
+        return _json_error(f"服务器错误: {str(e)}", code=500, http_status=500)
 
     # ── CLI：数据库种子数据 ──
     @app.cli.command("init-db")

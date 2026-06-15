@@ -37,6 +37,8 @@
         <el-table-column prop="created_at" label="时间" width="160" />
       </el-table>
 
+      <el-empty v-if="!loading && list.length===0" description="暂无操作日志" />
+
       <el-pagination
         v-model:current-page="pager.page" v-model:page-size="pager.per_page"
         :total="pager.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"

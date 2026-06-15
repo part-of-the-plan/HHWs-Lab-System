@@ -8,10 +8,10 @@
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" show-password
-            placeholder="8位以上,大写+小写+数字+符号至少三种" />
+            placeholder="8位以上,大写+小写+数字+符号至少三种" autocomplete="new-password" />
         </el-form-item>
         <el-form-item label="确认密码" prop="password2">
-          <el-input v-model="form.password2" type="password" show-password />
+          <el-input v-model="form.password2" type="password" show-password autocomplete="new-password" />
         </el-form-item>
         <el-form-item label="真实姓名" prop="real_name">
           <el-input v-model="form.real_name" />

@@ -6,7 +6,8 @@
         <el-tab-pane label="待确认归还" name="RETURN_PENDING" />
       </el-tabs>
 
-      <el-table :data="list" border stripe v-loading="loading">
+      <el-table :data="list" border stripe v-loading="loading"
+        :row-class-name="tableRowClassName">
         <el-table-column prop="username" label="申请人" width="100" />
         <el-table-column prop="device_name" label="设备" min-width="120" />
         <el-table-column prop="apply_time" label="申请时间" width="160" />
@@ -28,6 +29,8 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <el-empty v-if="!loading && list.length===0" description="暂无待审批记录" />
 
       <el-pagination
         v-model:current-page="pager.page"
@@ -67,6 +70,11 @@ const loading = ref(false)
 const pager = reactive({ page: 1, per_page: 10, total: 0 })
 
 const rejectDialog = reactive({ visible: false, loading: false, reason: '', currentId: null })
+
+/** 逾期的行背景标红 */
+function tableRowClassName({ row }) {
+  return row.is_overdue ? 'row-overdue' : ''
+}
 
 function onTabChange() {
   pager.page = 1
@@ -128,3 +136,10 @@ async function doConfirmReturn(row) {
 
 onMounted(fetchList)
 </script>
+
+<style scoped>
+.el-table .row-overdue td {
+  background-color: #fef0f0 !important;
+  border-left: 3px solid #f56c6c;
+}
+</style>

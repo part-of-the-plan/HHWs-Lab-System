@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-card>
-      <el-table :data="list" border stripe v-loading="loading">
+      <el-table :data="list" border stripe v-loading="loading"
+        :row-class-name="tableRowClassName">
         <el-table-column prop="device_name" label="设备" min-width="120" />
         <el-table-column prop="apply_time" label="申请时间" width="160" />
         <el-table-column prop="expected_return_date" label="预计归还" width="120" />
@@ -22,6 +23,8 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <el-empty v-if="!loading && list.length===0" description="暂无借用记录" />
 
       <el-pagination
         v-model:current-page="pager.page"
@@ -57,6 +60,11 @@ const statusTypeMap = {
 function statusLabel(s) { return statusMap[s] || s }
 function statusType(s) { return statusTypeMap[s] || 'info' }
 
+/** 逾期的行背景标红 */
+function tableRowClassName({ row }) {
+  return row.is_overdue ? 'row-overdue' : ''
+}
+
 async function fetchList() {
   loading.value = true
   try {
@@ -78,3 +86,10 @@ async function doReturnApply(row) {
 
 onMounted(fetchList)
 </script>
+
+<style scoped>
+.el-table .row-overdue td {
+  background-color: #fef0f0 !important;
+  border-left: 3px solid #f56c6c;
+}
+</style>

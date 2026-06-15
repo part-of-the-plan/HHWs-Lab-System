@@ -10,3 +10,4 @@ captcha==0.6.0
 gmssl==3.2.2
 cryptography==43.0.1
 gunicorn==23.0.0
+Flask-Limiter==3.5.0
