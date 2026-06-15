@@ -47,3 +47,36 @@ class Config:
     # ---- 初始超管 ----
     INIT_SUPERADMIN_USERNAME = os.getenv("INIT_SUPERADMIN_USERNAME", "superadmin")
     INIT_SUPERADMIN_PASSWORD = os.getenv("INIT_SUPERADMIN_PASSWORD", "Admin@123456")
+
+    # ---- CORS 允许来源 ----
+    # 开发期为空 -> 工厂里放开为 "*"；生产环境必须在 .env 里填具体域名
+    # 多个用逗号隔开，例如：https://lab.example.com,https://www.example.com
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
+
+    # 是否生产环境（控制 debug、错误详情暴露等）
+    IS_PRODUCTION = False
+
+
+class DevelopmentConfig(Config):
+    """本地开发：debug 开，CORS 全放开。"""
+    DEBUG = True
+    IS_PRODUCTION = False
+
+
+class ProductionConfig(Config):
+    """生产/云服务器：debug 关，CORS 收紧，密钥强制走环境变量。"""
+    DEBUG = False
+    IS_PRODUCTION = True
+
+
+# FLASK_ENV=production 时用 ProductionConfig，否则用 DevelopmentConfig
+_CONFIG_MAP = {
+    "production": ProductionConfig,
+    "development": DevelopmentConfig,
+}
+
+
+def get_config():
+    """按 FLASK_ENV 选择配置类，默认开发配置。"""
+    env = os.getenv("FLASK_ENV", "development").lower()
+    return _CONFIG_MAP.get(env, DevelopmentConfig)

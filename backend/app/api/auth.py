@@ -167,7 +167,8 @@ def login():
     # 4. 密码验证
     if not verify_password(password, user.password_hash):
         user.fail_count += 1
-        if user.fail_count >= current_app.config["LOGIN_FAIL_LIMIT"]:
+        limit = current_app.config["LOGIN_FAIL_LIMIT"]
+        if user.fail_count >= limit:
             user.lock_until = datetime.utcnow() + timedelta(
                 minutes=current_app.config["LOGIN_LOCK_MINUTES"])
             user.fail_count = 0
@@ -176,6 +177,12 @@ def login():
         db.session.commit()
         _log(operator_id=user.id, username=username, action="LOGIN_FAIL",
              target=f"用户ID:{user.id}", detail=f"密码错误(第{user.fail_count}次)", ip=ip, ua=ua)
+
+        # 失败 3 次起提示剩余次数（安全 UX 平衡：不给攻击者精确信息，
+        # 但合法用户需要知道自己离锁定还有多远）
+        if user.fail_count >= 3 and user.fail_count < limit:
+            left = limit - user.fail_count
+            return error(f"用户名或密码错误，再错{left}次账号将被锁定{current_app.config['LOGIN_LOCK_MINUTES']}分钟")
         return error("用户名或密码错误")
 
     # 5. 账号禁用检查

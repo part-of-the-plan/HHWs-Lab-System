@@ -2,20 +2,35 @@
 from flask import Flask
 from flask_cors import CORS
 
-from .config import Config
+from .config import get_config
 from .extensions import db, migrate, jwt, init_redis
 
 
-def create_app(config_class=Config):
+def create_app(config_class=None):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    # 不显式传入时按 FLASK_ENV 自动选 Development / Production
+    app.config.from_object(config_class or get_config())
+
+    # ── 反向代理修正：生产经 Nginx 反代，request.remote_addr 默认是 127.0.0.1
+    # 用 ProxyFix 信任 Nginx 透传的 X-Forwarded-For，审计日志才能记到真实客户端 IP。
+    # 只信任 1 层代理（我们只有 Nginx 一层），避免客户端伪造 XFF 头。
+    if app.config.get("IS_PRODUCTION"):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     # 初始化扩展
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     init_redis(app)
-    CORS(app, supports_credentials=True)
+
+    # ── CORS：生产按 .env 的 CORS_ORIGINS 白名单收紧，开发放开 ──
+    origins = app.config.get("CORS_ORIGINS", "")
+    if app.config.get("IS_PRODUCTION") and origins:
+        allow = [o.strip() for o in origins.split(",") if o.strip()]
+    else:
+        allow = "*"
+    CORS(app, resources={r"/api/*": {"origins": allow}}, supports_credentials=True)
 
     # ── 导入所有模型（确保 db.Model.metadata 里有它们，Migrate 才能识别）──
     from .models import (
@@ -26,6 +41,27 @@ def create_app(config_class=Config):
     # ── 注册蓝图 ──
     from .api.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
+
+    from .api.device import device_bp
+    app.register_blueprint(device_bp, url_prefix="/api/devices")
+
+    from .api.category import category_bp
+    app.register_blueprint(category_bp, url_prefix="/api/categories")
+
+    from .api.borrow import borrow_bp
+    app.register_blueprint(borrow_bp, url_prefix="/api/borrows")
+
+    from .api.user import user_bp
+    app.register_blueprint(user_bp, url_prefix="/api/users")
+
+    from .api.log import log_bp
+    app.register_blueprint(log_bp, url_prefix="/api/logs")
+
+    from .api.roles import roles_bp
+    app.register_blueprint(roles_bp, url_prefix="/api/roles")
+
+    from .api.stats import stats_bp
+    app.register_blueprint(stats_bp, url_prefix="/api/stats")
 
     # ── 注册中间件 ──
     from .middlewares.auth_middleware import register_auth_middleware
@@ -45,6 +81,18 @@ def create_app(config_class=Config):
     @app.get("/api/health")
     def health():
         return {"code": 0, "message": "ok", "data": {"status": "running"}}
+
+    # ── 安全响应头（Nginx 也会加，这里后端兜底，直连时也安全）──
+    @app.after_request
+    def set_security_headers(resp):
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        resp.headers["X-Frame-Options"] = "DENY"
+        resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if app.config.get("IS_PRODUCTION"):
+            resp.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
+        return resp
 
     return app
 

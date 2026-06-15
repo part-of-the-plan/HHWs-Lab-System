@@ -123,4 +123,4 @@ CREATE TABLE operation_logs (
   created_at  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_action (action),
   INDEX idx_created (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='操作日志';

@@ -1,0 +1,35 @@
+/* ═══ 全局主题变量 ═══
+   改主题色只需改 --brand-* 两行，所有页面自动继承。
+   Element Plus 官方变量参考：https://element-plus.org/zh-CN/guide/theming.html
+*/
+
+:root {
+  /* ═══ 品牌色 ═══ */
+  --brand-500: #5b7fff;           /* 主色：按钮、选中态 */
+  --brand-300: #a3baff;           /* 浅色：hover 背景 */
+  --brand-100: #e8edff;           /* 底色：表格斑马纹 */
+
+  /* ═══ 注入 Element Plus ═══ */
+  --el-color-primary: var(--brand-500);
+  --el-color-primary-light-3: var(--brand-300);
+  --el-color-primary-light-9: var(--brand-100);
+
+  /* ═══ 成功 / 警告 / 危险（不改也行，这里微调保持一致性）═══ */
+  --el-color-success: #67c23a;
+  --el-color-warning: #e6a23c;
+  --el-color-danger: #f56c6c;
+
+  /* ═══ 全局排版 ═══ */
+  --el-font-size-base: 14px;
+  --el-border-radius-base: 6px;      /* 全局圆角 */
+
+  /* ═══ 侧边栏 ═══ */
+  --sidebar-bg: #1e293b;             /* 深灰蓝代替纯黑 */
+  --sidebar-text: #cbd5e1;
+  --sidebar-active: #5b7fff;
+}
+
+/* ── 登录/注册背景（可在此统一替换）── */
+.auth-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
