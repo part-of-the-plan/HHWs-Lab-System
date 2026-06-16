@@ -74,6 +74,15 @@ def create_app(config_class=None):
     from .middlewares.auth_middleware import register_auth_middleware
     register_auth_middleware(app)
 
+    # ── CSRF 防护：对所有写请求校验 X-CSRF-Token 头 ──
+    from .utils.csrf import check_csrf
+
+    @app.before_request
+    def _csrf_check():
+        result = check_csrf()
+        if result is not None:
+            return result
+
     # ── 全局错误处理器：未捕获异常统一返回 JSON，而非 HTML 错误页 ──
     from .utils.response import error as _json_error
 

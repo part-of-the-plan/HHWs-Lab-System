@@ -36,7 +36,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import request from '../utils/request'
+import request, { initCsrfToken } from '../utils/request'
 import { setToken, setUser, setPermissions } from '../utils/auth'
 import { userStore } from '../stores/user'
 import { ElMessage } from 'element-plus'
@@ -84,6 +84,8 @@ async function doLogin() {
     setUser(res.data.user)
     setPermissions(res.data.permissions)
     userStore.loginSuccess(res.data)
+    // 获取 CSRF Token（写操作必须携带）
+    await initCsrfToken()
     ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/'
     router.push(redirect)

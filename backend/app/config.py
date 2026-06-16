@@ -43,6 +43,7 @@ class Config:
     LOGIN_FAIL_LIMIT = int(os.getenv("LOGIN_FAIL_LIMIT", "5"))
     LOGIN_LOCK_MINUTES = int(os.getenv("LOGIN_LOCK_MINUTES", "10"))
     CAPTCHA_EXPIRE_SECONDS = int(os.getenv("CAPTCHA_EXPIRE_SECONDS", "60"))
+    CSRF_TOKEN_EXPIRE_SECONDS = int(os.getenv("CSRF_TOKEN_EXPIRE_SECONDS", "7200"))
 
     # ---- 初始超管 ----
     INIT_SUPERADMIN_USERNAME = os.getenv("INIT_SUPERADMIN_USERNAME", "superadmin")

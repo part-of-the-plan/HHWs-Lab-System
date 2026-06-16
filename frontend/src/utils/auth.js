@@ -45,4 +45,21 @@ export function logout() {
   removeToken()
   removeUser()
   removePermissions()
+  clearCsrfToken()
+}
+
+// ==================== CSRF Token（仅内存，不持久化） ====================
+
+let _csrfToken = null
+
+export function setCsrfToken(token) {
+  _csrfToken = token
+}
+
+export function getCsrfToken() {
+  return _csrfToken
+}
+
+export function clearCsrfToken() {
+  _csrfToken = null
 }

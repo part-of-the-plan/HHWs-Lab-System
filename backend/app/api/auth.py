@@ -215,6 +215,23 @@ def login():
     })
 
 
+# ==================== CSRF Token ====================
+
+@auth_bp.get("/csrf-token")
+def get_csrf_token():
+    """登录后获取 CSRF Token（写操作必须携带）。
+    前端在登录成功后调用此接口，将返回的 token 存内存，
+    后续所有 POST/PUT/DELETE 请求在 X-CSRF-Token 头里带回。
+    """
+    user_id = _current_user_id()
+    if not user_id:
+        return error("请先登录", code=401, http_status=401)
+
+    from app.utils.csrf import generate_csrf_token
+    token = generate_csrf_token(user_id)
+    return success({"csrf_token": token})
+
+
 # ==================== 修改密码 ====================
 
 @auth_bp.put("/password")

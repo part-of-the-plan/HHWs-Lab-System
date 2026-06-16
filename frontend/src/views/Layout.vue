@@ -65,12 +65,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { userStore } from '../stores/user'
 import { menuMap } from '../router/index'
 import { Fold, Expand, HomeFilled } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
+import { initCsrfToken } from '../utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -125,6 +126,11 @@ function doLogout() {
     })
     .catch(() => {})
 }
+
+// 页面刷新后重新获取 CSRF Token（JWT 在 localStorage 但 CSRF Token 在内存已丢失）
+onMounted(() => {
+  initCsrfToken()
+})
 </script>
 
 <style scoped>
