@@ -40,6 +40,7 @@ class BorrowRecord(db.Model):
         return self.status
 
     def to_dict(self):
+        from app.utils.timezone import to_beijing_time
         return {
             "id": self.id,
             "user_id": self.user_id,
@@ -47,16 +48,16 @@ class BorrowRecord(db.Model):
             "device_id": self.device_id,
             "device_name": self.device.name if self.device else None,
             "device_no": self.device.device_no if self.device else None,
-            "apply_time": str(self.apply_time) if self.apply_time else None,
+            "apply_time": to_beijing_time(self.apply_time),
             "apply_reason": self.apply_reason,
             "expected_return_date": str(self.expected_return_date) if self.expected_return_date else None,
             "status": self.effective_status(),
             "is_overdue": self.is_overdue(),
             "approver_name": self.approver.real_name if self.approver else None,
-            "approve_time": str(self.approve_time) if self.approve_time else None,
+            "approve_time": to_beijing_time(self.approve_time),
             "reject_reason": self.reject_reason,
-            "actual_return_time": str(self.actual_return_time) if self.actual_return_time else None,
-            "return_confirm_time": str(self.return_confirm_time) if self.return_confirm_time else None,
+            "actual_return_time": to_beijing_time(self.actual_return_time),
+            "return_confirm_time": to_beijing_time(self.return_confirm_time),
             "return_confirmer_name": self.return_confirmer.real_name if self.return_confirmer else None,
             "remark": self.remark,
         }

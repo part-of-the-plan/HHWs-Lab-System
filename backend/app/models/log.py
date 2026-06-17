@@ -17,6 +17,7 @@ class OperationLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
+        from app.utils.timezone import to_beijing_time
         return {
             "id": self.id,
             "operator_id": self.operator_id,
@@ -26,5 +27,5 @@ class OperationLog(db.Model):
             "detail": self.detail,
             "ip": self.ip,
             "user_agent": self.user_agent,
-            "created_at": str(self.created_at) if self.created_at else None,
+            "created_at": to_beijing_time(self.created_at),
         }
