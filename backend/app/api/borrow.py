@@ -79,6 +79,15 @@ def apply_borrow():
     if active >= max_count:
         return error(f"你当前借用/申请中的设备已达上限({max_count}台)")
 
+    # 逾期限制：有逾期未还设备的用户禁止借用新设备
+    overdue_count = BorrowRecord.query.filter(
+        BorrowRecord.user_id == user_id,
+        BorrowRecord.status == "BORROWED",
+        BorrowRecord.expected_return_date < date.today()
+    ).count()
+    if overdue_count > 0:
+        return error(f"你有 {overdue_count} 条逾期未还记录，请先归还后再申请借用")
+
     # 创建记录（PENDING，此时不改设备状态——尚未批准）
     record = BorrowRecord(
         user_id=user_id,
