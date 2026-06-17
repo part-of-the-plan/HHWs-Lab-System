@@ -4,6 +4,7 @@
       <el-tabs v-model="activeTab" @tab-change="onTabChange">
         <el-tab-pane label="待审批" name="PENDING" />
         <el-tab-pane label="待确认归还" name="RETURN_PENDING" />
+        <el-tab-pane label="已逾期" name="OVERDUE" />
       </el-tabs>
 
       <el-table :data="list" border stripe v-loading="loading"
@@ -61,8 +62,11 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import request from '../../utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+
+const route = useRoute()
 
 const activeTab = ref('PENDING')
 const list = ref([])
@@ -134,7 +138,11 @@ async function doConfirmReturn(row) {
   } catch { /* ignore */ }
 }
 
-onMounted(fetchList)
+onMounted(() => {
+  const q = route.query.tab
+  if (q === 'OVERDUE') activeTab.value = 'OVERDUE'
+  fetchList()
+})
 </script>
 
 <style scoped>

@@ -121,12 +121,13 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import request from '../../utils/request'
 import { userStore } from '../../stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 
 // 分类列表
 const categories = ref([])
@@ -284,6 +285,9 @@ function goBorrow(row) {
 }
 
 onMounted(() => {
+  // 从首页看板跳转过来时可以带 ?status=IDLE|BORROWED
+  const q = route.query.status
+  if (q) filter.status = q
   fetchCategories()
   fetchList()
 })

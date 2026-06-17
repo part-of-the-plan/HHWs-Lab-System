@@ -253,7 +253,13 @@ def list_borrows():
     if mine_only or "record:all" not in perms:
         query = query.filter(BorrowRecord.user_id == get_current_user_id())
 
-    if status_filter:
+    if status_filter == "OVERDUE":
+        # OVERDUE 是动态状态：BORROWED 且 expected_return_date < 今天
+        query = query.filter(
+            BorrowRecord.status == "BORROWED",
+            BorrowRecord.expected_return_date < date.today()
+        )
+    elif status_filter:
         query = query.filter(BorrowRecord.status == status_filter)
 
     if keyword:

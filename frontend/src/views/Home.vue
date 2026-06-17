@@ -2,10 +2,10 @@
   <div v-if="isAdmin">
     <!-- 统计卡片 -->
     <el-row :gutter="16" style="margin-bottom:16px">
-      <el-col :span="6"><stat-card title="设备总数" :value="overview.total" color="#409eff" /></el-col>
-      <el-col :span="6"><stat-card title="空闲设备" :value="overview.idle" color="#67c23a" /></el-col>
-      <el-col :span="6"><stat-card title="借出中" :value="overview.borrowed" color="#e6a23c" /></el-col>
-      <el-col :span="6"><stat-card title="逾期未还" :value="overview.overdue" color="#f56c6c" /></el-col>
+      <el-col :span="6"><div class="stat-clickable" @click="$router.push('/device/list')"><stat-card title="设备总数" :value="overview.total" color="#409eff" /></div></el-col>
+      <el-col :span="6"><div class="stat-clickable" @click="$router.push('/device/list?status=IDLE')"><stat-card title="空闲设备" :value="overview.idle" color="#67c23a" /></div></el-col>
+      <el-col :span="6"><div class="stat-clickable" @click="$router.push('/device/list?status=BORROWED')"><stat-card title="借出中" :value="overview.borrowed" color="#e6a23c" /></div></el-col>
+      <el-col :span="6"><div class="stat-clickable" @click="$router.push('/borrow/approve?tab=OVERDUE')"><stat-card title="逾期未还" :value="overview.overdue" color="#f56c6c" /></div></el-col>
     </el-row>
 
     <!-- 图表 -->
@@ -120,3 +120,8 @@ const card = {
 }
 export default { components: { 'stat-card': card } }
 </script>
+
+<style scoped>
+.stat-clickable { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border-radius: 8px; }
+.stat-clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+</style>
