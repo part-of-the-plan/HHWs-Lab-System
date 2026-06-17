@@ -1,5 +1,5 @@
 """Flask 应用工厂。"""
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 
 from .config import get_config
