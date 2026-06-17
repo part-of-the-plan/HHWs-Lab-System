@@ -83,6 +83,47 @@ def create_app(config_class=None):
         if result is not None:
             return result
 
+    # ── 目录遍历防护：拒绝含 ../ 等危险片段的请求 ──
+    from .utils.validators import is_safe_path
+
+    @app.before_request
+    def _path_traversal_check():
+        # 1. 检查 URL 路径本身
+        if not is_safe_path(request.path):
+            return _json_error("请求路径包含非法字符", code=400, http_status=400)
+
+        # 2. 检查 JSON body / form / query args 里的字符串值
+        sources = []
+        if request.is_json:
+            try:
+                sources.append(request.get_json(silent=True) or {})
+            except Exception:
+                pass
+        if request.form:
+            sources.append(request.form.to_dict())
+        if request.args:
+            sources.append(request.args.to_dict())
+
+        def _check(obj):
+            if isinstance(obj, str):
+                if not is_safe_path(obj):
+                    return True
+            elif isinstance(obj, dict):
+                for v in obj.values():
+                    if _check(v):
+                        return True
+            elif isinstance(obj, list):
+                for item in obj:
+                    if _check(item):
+                        return True
+            return False
+
+        for src in sources:
+            if _check(src):
+                return _json_error("请求数据包含非法字符", code=400, http_status=400)
+
+        return None
+
     # ── 全局错误处理器：未捕获异常统一返回 JSON，而非 HTML 错误页 ──
     from .utils.response import error as _json_error
 
