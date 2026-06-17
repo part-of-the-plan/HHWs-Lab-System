@@ -154,6 +154,8 @@ async function fetchBadges() {
     // 审批管理页：pending + return_pending 合计
     const total = (d.pending || 0) + (d.return_pending || 0)
     badgeMap['/borrow/approve'] = total
+    // 我的记录：自己逾期未还的数量
+    badgeMap['/borrow/my'] = d.my_overdue || 0
   } catch { /* 静默失败，不影响页面 */ }
 }
 

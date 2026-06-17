@@ -283,10 +283,35 @@ def pending_count():
     """返回待审批 + 待确认归还的数量。无需特殊权限——有 borrow:approve
        就返回 pending 数,有 borrow:return 就返回 return_pending 数,
        都没有则返回 0。"""
+    user_id = get_current_user_id()
     perms = getattr(g, "current_permissions", set())
-    result = {"pending": 0, "return_pending": 0}
+    result = {"pending": 0, "return_pending": 0, "my_overdue": 0}
     if "borrow:approve" in perms:
         result["pending"] = BorrowRecord.query.filter_by(status="PENDING").count()
     if "borrow:return" in perms:
         result["return_pending"] = BorrowRecord.query.filter_by(status="RETURN_PENDING").count()
+    # 当前用户自己的逾期数（用于"我的记录"角标）
+    if user_id:
+        result["my_overdue"] = BorrowRecord.query.filter(
+            BorrowRecord.user_id == user_id,
+            BorrowRecord.status == "BORROWED",
+            BorrowRecord.expected_return_date < date.today()
+        ).count()
     return success(result)
+
+
+# ==================== 管理员提醒归还 ====================
+
+@borrow_bp.post("/<int:rid>/remind")
+@require_permission("borrow:approve")
+def remind_return(rid):
+    """管理员对逾期记录发起提醒归还（仅记操作日志，不建新表）。"""
+    record = BorrowRecord.query.get(rid)
+    if not record:
+        return error("借用记录不存在")
+    if not record.is_overdue():
+        return error("该记录未逾期，无需提醒")
+
+    log_action("BORROW_REMIND", f"借用记录ID:{rid}",
+               f"提醒用户ID:{record.user_id}归还设备ID:{record.device_id}")
+    return success(message="已提醒用户归还")

@@ -29,6 +29,13 @@
             <el-button size="small" type="primary" @click="doConfirmReturn(row)">确认归还</el-button>
           </template>
         </el-table-column>
+
+        <!-- 已逾期：提醒归还 -->
+        <el-table-column v-if="activeTab==='OVERDUE'" label="操作" width="120" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" type="warning" @click="doRemind(row)">提醒归还</el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-empty v-if="!loading && list.length===0" description="暂无待审批记录" />
@@ -139,6 +146,13 @@ async function doConfirmReturn(row) {
     ElMessage.success('已确认归还，设备状态恢复为空闲')
     refreshBadges()
     fetchList()
+  } catch { /* ignore */ }
+}
+
+async function doRemind(row) {
+  try {
+    await request.post(`/borrows/${row.id}/remind`)
+    ElMessage.success(`已提醒「${row.user_name}」归还「${row.device_name}」`)
   } catch { /* ignore */ }
 }
 
