@@ -8,7 +8,7 @@
 
       <el-table :data="list" border stripe v-loading="loading"
         :row-class-name="tableRowClassName">
-        <el-table-column prop="username" label="申请人" width="100" />
+        <el-table-column prop="user_name" label="申请人" width="100" />
         <el-table-column prop="device_name" label="设备" min-width="120" />
         <el-table-column prop="apply_time" label="申请时间" width="160" />
         <el-table-column prop="apply_reason" label="借用理由" min-width="140" />
@@ -95,7 +95,7 @@ async function fetchList() {
 
 async function doApprove(row) {
   try {
-    await ElMessageBox.confirm(`确认通过「${row.username}」对「${row.device_name}」的借用申请？`, '审批通过')
+    await ElMessageBox.confirm(`确认通过「${row.user_name}」对「${row.device_name}」的借用申请？`, '审批通过')
     await request.put(`/borrows/${row.id}/approve`)
     ElMessage.success('已通过，设备状态已更新')
     fetchList()
@@ -127,7 +127,7 @@ async function doReject() {
 
 async function doConfirmReturn(row) {
   try {
-    await ElMessageBox.confirm(`确认「${row.username}」已归还「${row.device_name}」？`, '确认归还')
+    await ElMessageBox.confirm(`确认「${row.user_name}」已归还「${row.device_name}」？`, '确认归还')
     await request.put(`/borrows/${row.id}/confirm-return`)
     ElMessage.success('已确认归还，设备状态恢复为空闲')
     fetchList()
