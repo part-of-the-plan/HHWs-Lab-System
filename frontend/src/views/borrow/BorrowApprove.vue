@@ -61,12 +61,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import request from '../../utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
+const refreshBadges = inject('refreshBadges', () => {})
 
 const activeTab = ref('PENDING')
 const list = ref([])
@@ -102,6 +103,7 @@ async function doApprove(row) {
     await ElMessageBox.confirm(`确认通过「${row.user_name}」对「${row.device_name}」的借用申请？`, '审批通过')
     await request.put(`/borrows/${row.id}/approve`)
     ElMessage.success('已通过，设备状态已更新')
+    refreshBadges()
     fetchList()
   } catch { /* ignore */ }
 }
@@ -124,6 +126,7 @@ async function doReject() {
     })
     ElMessage.success('已驳回')
     rejectDialog.visible = false
+    refreshBadges()
     fetchList()
   } catch { /* ignore */ }
   finally { rejectDialog.loading = false }
@@ -134,6 +137,7 @@ async function doConfirmReturn(row) {
     await ElMessageBox.confirm(`确认「${row.user_name}」已归还「${row.device_name}」？`, '确认归还')
     await request.put(`/borrows/${row.id}/confirm-return`)
     ElMessage.success('已确认归还，设备状态恢复为空闲')
+    refreshBadges()
     fetchList()
   } catch { /* ignore */ }
 }

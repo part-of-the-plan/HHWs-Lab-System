@@ -40,9 +40,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, inject } from 'vue'
 import request from '../../utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+
+const refreshBadges = inject('refreshBadges', () => {})
 
 const list = ref([])
 const loading = ref(false)
@@ -79,6 +81,7 @@ async function doReturnApply(row) {
     await ElMessageBox.confirm('确认申请归还该设备？', '提示', { type: 'info' })
     await request.put(`/borrows/${row.id}/return-apply`)
     ElMessage.success('归还申请已提交，等待管理员确认')
+    refreshBadges()
     fetchList()
   } catch { /* ignore */ }
 }

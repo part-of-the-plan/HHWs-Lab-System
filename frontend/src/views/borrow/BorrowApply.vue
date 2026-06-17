@@ -25,13 +25,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import request from '../../utils/request'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
+const refreshBadges = inject('refreshBadges', () => {})
 
 const devices = ref([])
 const loading = ref(false)
@@ -76,6 +77,7 @@ async function doSubmit() {
       expected_return_date: form.expected_return_date,
     })
     ElMessage.success('申请已提交')
+    refreshBadges()
     router.push('/borrow/my')
   } catch { /* ignore */ }
   finally { loading.value = false }

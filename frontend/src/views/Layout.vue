@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive, provide } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { userStore } from '../stores/user'
 import { menuMap } from '../router/index'
@@ -156,6 +156,9 @@ async function fetchBadges() {
     badgeMap['/borrow/approve'] = total
   } catch { /* 静默失败，不影响页面 */ }
 }
+
+// 提供给子组件（如 BorrowApprove）在审批操作后立即刷新角标
+provide('refreshBadges', fetchBadges)
 
 function doLogout() {
   ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning' })
