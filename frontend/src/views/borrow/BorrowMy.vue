@@ -11,7 +11,6 @@
             <el-tag :type="statusType(row.effective_status || row.status)">
               {{ statusLabel(row.effective_status || row.status) }}
             </el-tag>
-            <el-tag v-if="row.is_overdue" type="danger" size="small" style="margin-left:4px">逾期</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="apply_reason" label="借用理由" min-width="140" />
