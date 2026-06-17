@@ -67,7 +67,7 @@ function tableRowClassName({ row }) {
 async function fetchList() {
   loading.value = true
   try {
-    const res = await request.get('/borrows', { params: { page: pager.page, per_page: pager.per_page } })
+    const res = await request.get('/borrows', { params: { page: pager.page, per_page: pager.per_page, mine: 1 } })
     list.value = res.data.items
     pager.total = res.data.total
   } catch { /* ignore */ }

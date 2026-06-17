@@ -160,7 +160,7 @@ BORROWS = [
     ("wangwu",    "高性能笔记本", "REJECTED",      7,    "外出调研"),
     ("wangwu",    "开发板套件",   "BORROWED",    21,    "嵌入式开发项目"),
     ("zhangsan",  "台式工作站",   "OVERDUE",      -5,   "延期未还（设为PENDING天数=-5模拟逾期）"),
-    ("zhaoliu",   "迷你主机",     "APPROVED",      3,    "数据处理任务"),
+    ("zhaoliu",   "迷你主机",     "BORROWED",      3,    "数据处理任务"),
     ("zhaoliu",   "移动硬盘",     "BORROWED",      5,    "数据备份"),
     ("sunqi",     "信号分析仪",   "PENDING",       7,    "射频测试"),
     ("sunqi",     "可编程电源",   "RETURNED",     10,    "电路测试完成"),
@@ -172,7 +172,7 @@ BORROWS = [
     ("wujian",    "数字焊台",     "RETURNED",      5,    "硬件焊接实训"),
     ("zhengsan",  "三层交换机",   "PENDING",       4,    "网络配置实验"),
     ("zhengsan",  "监听音箱",     "BORROWED",      7,    "音频算法测试"),
-    ("wangyi",    "LoRa网关",     "APPROVED",      5,    "物联网组网实验"),
+    ("wangyi",    "LoRa网关",     "BORROWED",      5,    "物联网组网实验"),
     ("wangyi",    "温湿度传感器", "BORROWED",      7,    "环境数据采集"),
     ("fengyi",    "直流稳压电源", "RETURNED",      3,    "电路供电测试"),
     ("fengyi",    "电子负载",     "BORROWED",      5,    "电源性能测试"),
@@ -265,6 +265,13 @@ def run():
             dev = dev_map.get(dev_name)
             if not user or not dev:
                 print(f"[BORROW] 跳过（用户或设备不存在）: {user_name} → {dev_name}")
+                continue
+
+            # 幂等去重：同一用户+设备+理由已存在则跳过，防止重复跑脚本叠加记录、
+            # 把设备状态搞乱（例如 PENDING 申请的设备被另一条重复记录置为 BORROWED）。
+            if BorrowRecord.query.filter_by(
+                    user_id=user.id, device_id=dev.id, apply_reason=remark).first():
+                print(f"[BORROW] 跳过（已存在）: {user_name} → {dev_name}")
                 continue
 
             # 按分钟错开申请时间

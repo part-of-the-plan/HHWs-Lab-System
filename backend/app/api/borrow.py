@@ -243,11 +243,14 @@ def list_borrows():
     per_page = request.args.get("per_page", 10, type=int)
     status_filter = request.args.get("status")
     keyword = request.args.get("keyword", "").strip()
+    # mine=1：强制只看本人记录（"我的记录"页用）。即使有 record:all 也只返回自己的，
+    # 否则超管的"我的记录"会混进所有人的记录，且出现无权操作的他人申请。
+    mine_only = request.args.get("mine", type=int) == 1
 
     query = BorrowRecord.query
 
-    # 数据行级隔离：无 record:all 只能看自己
-    if "record:all" not in perms:
+    # 数据行级隔离：无 record:all 只能看自己；mine=1 时无论权限都只看自己
+    if mine_only or "record:all" not in perms:
         query = query.filter(BorrowRecord.user_id == get_current_user_id())
 
     if status_filter:
