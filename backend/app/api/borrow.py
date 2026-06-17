@@ -268,3 +268,19 @@ def list_borrows():
         "page": page,
         "per_page": per_page,
     })
+
+
+# ==================== 待办计数（前端红点角标用） ====================
+
+@borrow_bp.get("/pending-count")
+def pending_count():
+    """返回待审批 + 待确认归还的数量。无需特殊权限——有 borrow:approve
+       就返回 pending 数,有 borrow:return 就返回 return_pending 数,
+       都没有则返回 0。"""
+    perms = getattr(g, "current_permissions", set())
+    result = {"pending": 0, "return_pending": 0}
+    if "borrow:approve" in perms:
+        result["pending"] = BorrowRecord.query.filter_by(status="PENDING").count()
+    if "borrow:return" in perms:
+        result["return_pending"] = BorrowRecord.query.filter_by(status="RETURN_PENDING").count()
+    return success(result)

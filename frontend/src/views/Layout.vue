@@ -29,6 +29,7 @@
             <el-menu-item v-for="child in menu.children" :key="child.path"
               :index="child.path">
               {{ child.title }}
+              <span v-if="badgeMap[child.path]" class="menu-badge">{{ badgeMap[child.path] > 99 ? '99+' : badgeMap[child.path] }}</span>
             </el-menu-item>
           </el-sub-menu>
         </template>
@@ -88,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { userStore } from '../stores/user'
 import { menuMap } from '../router/index'
@@ -141,6 +142,20 @@ const sideMenus = computed(() => {
   }
   return result
 })
+
+// ── 待办角标轮询 ──
+const badgeMap = reactive({})     // path → count
+let badgeTimer = null
+
+async function fetchBadges() {
+  try {
+    const res = await request.get('/borrows/pending-count')
+    const d = res.data
+    // 审批管理页：pending + return_pending 合计
+    const total = (d.pending || 0) + (d.return_pending || 0)
+    badgeMap['/borrow/approve'] = total
+  } catch { /* 静默失败，不影响页面 */ }
+}
 
 function doLogout() {
   ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning' })
@@ -204,6 +219,12 @@ async function doChangePassword() {
 // 页面刷新后重新获取 CSRF Token（JWT 在 localStorage 但 CSRF Token 在内存已丢失）
 onMounted(() => {
   initCsrfToken()
+  fetchBadges()
+  badgeTimer = setInterval(fetchBadges, 30000)   // 每30s刷新角标
+})
+
+onUnmounted(() => {
+  if (badgeTimer) clearInterval(badgeTimer)
 })
 </script>
 
@@ -215,4 +236,7 @@ onMounted(() => {
 .header { display:flex; align-items:center; justify-content:space-between;
   background:#fff; border-bottom:1px solid #e6e6e6; height:60px; }
 .breadcrumb-bar { padding:12px 20px; background:#fff; border-bottom:1px solid #eee; }
+.menu-badge { display:inline-block; background:#f56c6c; color:#fff; font-size:11px;
+  border-radius:10px; padding:0 6px; min-width:18px; height:18px; line-height:18px;
+  text-align:center; margin-left:6px; }
 </style>
