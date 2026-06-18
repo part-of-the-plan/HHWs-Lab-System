@@ -268,7 +268,7 @@ async function initUtilChart() {
       },
       yAxis: {
         type: 'category',
-        data: d.labels.reverse(),
+        data: d.labels,
         inverse: true,
         axisLine: { show: false },
         axisTick: { show: false },
@@ -282,7 +282,7 @@ async function initUtilChart() {
       series: [{
         id: 'util-top10',
         type: 'bar',
-        data: d.values.reverse(),
+        data: d.values,
         barWidth: 18,
         itemStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
