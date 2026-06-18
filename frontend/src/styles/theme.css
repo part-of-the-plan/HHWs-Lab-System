@@ -1,35 +1,199 @@
 /* ═══ 全局主题变量 ═══
-   改主题色只需改 --brand-* 两行，所有页面自动继承。
-   Element Plus 官方变量参考：https://element-plus.org/zh-CN/guide/theming.html
+   冷雾蓝灰单色体系 — Cool Foggy Blue-Gray Monochromatic System
+   统一用于登录页、看板、导航及所有业务页面。
 */
 
 :root {
-  /* ═══ 品牌色 ═══ */
-  --brand-500: #5b7fff;           /* 主色：按钮、选中态 */
-  --brand-300: #a3baff;           /* 浅色：hover 背景 */
-  --brand-100: #e8edff;           /* 底色：表格斑马纹 */
+  /* ═══ 页面基础 ═══ */
+  --app-bg: #F5F7FB;
+  --app-bg-blue: #E5EDFA;
+  --surface: #FFFFFF;
+  --surface-soft: #F8FAFD;
+  --surface-tinted: #F0F4FA;
+  --surface-overlay: rgba(255, 255, 255, 0.84);
+
+  /* ═══ 品牌蓝灰色阶 ═══ */
+  --primary-50: #F2F5FB;
+  --primary-100: #E5EDFA;
+  --primary-200: #BBD0ED;
+  --primary-300: #A2B7E4;
+  --primary-400: #879DCC;
+  --primary-500: #7087BB;
+  --primary-600: #495589;
+  --primary-700: #2E3E6D;
+  --primary-800: #24345D;
+
+  /* ═══ 文字 ═══ */
+  --text-primary: #263248;
+  --text-heading: #2E3E6D;
+  --text-secondary: #687287;
+  --text-tertiary: #949DAE;
+  --text-disabled: #B1B8C4;
+  --text-on-dark: #FFFFFF;
+
+  /* ═══ 边框 ═══ */
+  --border-light: #E4EAF2;
+  --border-medium: #D3DCE8;
+  --border-strong: #BFCBDD;
+  --border-focus: #7087BB;
+
+  /* ═══ 信息状态 ═══ */
+  --info: #7087BB;
+  --info-text: #526A9D;
+  --info-bg: #EEF2FA;
+  --info-border: #CBD6EC;
+
+  /* ═══ 成功状态 ═══ */
+  --success: #6F8F80;
+  --success-text: #5F7E70;
+  --success-bg: #EEF5F1;
+  --success-border: #CBDDD4;
+
+  /* ═══ 警告状态 ═══ */
+  --warning: #A98458;
+  --warning-text: #8E704C;
+  --warning-bg: #F7F1E9;
+  --warning-border: #E6D2BA;
+
+  /* ═══ 错误和逾期状态 ═══ */
+  --danger: #B06F77;
+  --danger-text: #985D65;
+  --danger-bg: #F8ECEE;
+  --danger-border: #E5C8CD;
+
+  /* ═══ 中性状态 ═══ */
+  --neutral-status: #7D8491;
+  --neutral-status-bg: #F1F3F6;
+  --neutral-status-border: #D8DCE3;
+
+  /* ═══ 圆角 ═══ */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* ═══ 阴影 ═══ */
+  --shadow-xs: 0 2px 8px rgba(46, 62, 109, 0.035);
+  --shadow-sm: 0 4px 14px rgba(46, 62, 109, 0.045);
+  --shadow-md: 0 12px 32px rgba(46, 62, 109, 0.075);
+
+  /* ═══ 动效 ═══ */
+  --duration-fast: 160ms;
+  --duration-normal: 260ms;
+  --duration-slow: 480ms;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+
+  /* ═══ 布局 ═══ */
+  --sidebar-width: 224px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+  --page-padding: 24px;
+  --content-gap: 16px;
 
   /* ═══ 注入 Element Plus ═══ */
-  --el-color-primary: var(--brand-500);
-  --el-color-primary-light-3: var(--brand-300);
-  --el-color-primary-light-9: var(--brand-100);
+  --el-color-primary: var(--primary-600);
+  --el-color-primary-light-3: var(--primary-300);
+  --el-color-primary-light-5: var(--primary-200);
+  --el-color-primary-light-7: var(--primary-100);
+  --el-color-primary-light-9: var(--primary-50);
+  --el-color-primary-dark-2: var(--primary-700);
 
-  /* ═══ 成功 / 警告 / 危险（不改也行，这里微调保持一致性）═══ */
-  --el-color-success: #67c23a;
-  --el-color-warning: #e6a23c;
-  --el-color-danger: #f56c6c;
+  --el-color-success: var(--success);
+  --el-color-warning: var(--warning);
+  --el-color-danger: var(--danger);
 
-  /* ═══ 全局排版 ═══ */
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-secondary);
+  --el-text-color-secondary: var(--text-tertiary);
+  --el-text-color-placeholder: var(--text-tertiary);
+  --el-text-color-disabled: var(--text-disabled);
+
+  --el-border-color: var(--border-medium);
+  --el-border-color-light: var(--border-light);
+  --el-border-color-lighter: var(--border-light);
+  --el-border-color-extra-light: var(--border-light);
+
+  --el-bg-color: var(--surface);
+  --el-bg-color-page: var(--app-bg);
+  --el-bg-color-overlay: var(--surface);
+
+  --el-border-radius-base: var(--radius-sm);
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 20px;
+  --el-border-radius-circle: 999px;
+
   --el-font-size-base: 14px;
-  --el-border-radius-base: 6px;      /* 全局圆角 */
 
-  /* ═══ 侧边栏 ═══ */
-  --sidebar-bg: #1e293b;             /* 深灰蓝代替纯黑 */
+  /* ═══ 侧边栏（Stage 4 将更新） ═══ */
+  --sidebar-bg: var(--primary-700);
   --sidebar-text: #cbd5e1;
-  --sidebar-active: #5b7fff;
+  --sidebar-active: var(--primary-300);
 }
 
-/* ── 登录/注册背景（可在此统一替换）── */
+/* ── 登录/注册背景 ── */
 .auth-bg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--primary-100);
+  position: relative;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(187, 208, 237, 0.10), transparent),
+    radial-gradient(ellipse 60% 50% at 75% 70%, rgba(162, 183, 228, 0.08), transparent);
+  pointer-events: none;
+}
+
+/* ═══ 可复用入场动效 ═══ */
+
+/* 淡入上移：标题、输入框、按钮等元素的错峰浮现 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 卡片揭示：轻微缩放 + 上移 */
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 低强度脉冲：仅用于真正的异常状态指示 */
+@keyframes status-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(176, 111, 119, 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(176, 111, 119, 0.18);
+  }
+}
+
+/* ═══ 减少动态：无障碍兜底 ═══ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

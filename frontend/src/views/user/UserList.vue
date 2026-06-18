@@ -32,29 +32,29 @@
         </el-table-column>
         <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="userStore.hasPermission('user:update')" size="small" type="primary" link @click="openEdit(row)">编辑</el-button>
+            <div class="table-actions">
+              <el-button v-if="userStore.hasPermission('user:update')"
+                size="small" class="act-btn act-edit" @click="openEdit(row)">编辑</el-button>
 
-            <!-- 自操作保护：超管不能改自己的角色 -->
-            <el-tooltip v-if="userStore.hasPermission('user:assign') && isSelf(row)"
-              content="不能修改自己的角色，防止误操作锁死账号" placement="top">
-              <span style="margin-left:12px">
-                <el-button size="small" type="warning" link disabled>角色</el-button>
-              </span>
-            </el-tooltip>
-            <el-button v-else-if="userStore.hasPermission('user:assign')"
-              size="small" type="warning" link @click="openRole(row)">角色</el-button>
+              <!-- 自操作保护：超管不能改自己的角色 -->
+              <el-tooltip v-if="userStore.hasPermission('user:assign') && isSelf(row)"
+                content="不能修改自己的角色，防止误操作锁死账号" placement="top">
+                <el-button size="small" class="act-btn act-role" disabled>角色</el-button>
+              </el-tooltip>
+              <el-button v-else-if="userStore.hasPermission('user:assign')"
+                size="small" class="act-btn act-role" @click="openRole(row)">角色</el-button>
 
-            <!-- 自操作保护：超管不能禁用自己 -->
-            <el-tooltip v-if="userStore.hasPermission('user:status') && isSelf(row)"
-              content="不能禁用自己的账号" placement="top">
-              <span style="margin-left:12px">
-                <el-button size="small" type="danger" link disabled>禁用</el-button>
-              </span>
-            </el-tooltip>
-            <el-button v-else-if="userStore.hasPermission('user:status')" size="small"
-              :type="row.status===1 ? 'danger' : 'success'" link @click="doToggleStatus(row)">
-              {{ row.status===1 ? '禁用' : '启用' }}
-            </el-button>
+              <!-- 自操作保护：超管不能禁用自己 -->
+              <el-tooltip v-if="userStore.hasPermission('user:status') && isSelf(row)"
+                content="不能禁用自己的账号" placement="top">
+                <el-button size="small" class="act-btn act-toggle" disabled>禁用</el-button>
+              </el-tooltip>
+              <el-button v-else-if="userStore.hasPermission('user:status')" size="small"
+                class="act-btn" :class="row.status===1 ? 'act-danger' : 'act-success'"
+                @click="doToggleStatus(row)">
+                {{ row.status===1 ? '禁用' : '启用' }}
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -216,3 +216,85 @@ async function doToggleStatus(row) {
 
 onMounted(() => { fetchRoles(); fetchList() })
 </script>
+
+<style scoped>
+/* ── 表格操作项容器 ── */
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── 操作按钮基础 ── */
+.act-btn {
+  min-height: 30px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+
+.act-btn:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
+/* ── 编辑 ── */
+.act-edit {
+  color: #5F73A5;
+}
+
+.act-edit:hover {
+  color: #495589;
+  background: #EEF2FA;
+  border-color: #D5DEEF;
+}
+
+/* ── 角色 ── */
+.act-role {
+  color: #98784F;
+}
+
+.act-role:hover {
+  color: #81633E;
+  background: #F7F1E9;
+  border-color: #E6D2BA;
+}
+
+/* ── 禁用（危险操作）── */
+.act-danger {
+  color: #A76670;
+}
+
+.act-danger:hover {
+  color: #8F5660;
+  background: #F8ECEE;
+  border-color: #E5C8CD;
+}
+
+/* ── 启用（恢复操作）── */
+.act-success {
+  color: #5F7E70;
+}
+
+.act-success:hover {
+  color: #4A6B5D;
+  background: #EEF5F1;
+  border-color: #CBDDD4;
+}
+
+/* ── 禁用状态 ── */
+.act-btn:disabled,
+.act-btn.is-disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  background: transparent;
+  border-color: transparent;
+}
+</style>

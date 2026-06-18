@@ -18,22 +18,24 @@
         <!-- 待审批：通过/驳回 -->
         <el-table-column v-if="activeTab==='PENDING'" label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="success" @click="doApprove(row)">通过</el-button>
-            <el-button size="small" type="danger" @click="openReject(row)">驳回</el-button>
+            <div class="approve-actions">
+              <el-button size="small" class="apv-btn apv-pass" @click="doApprove(row)">通过</el-button>
+              <el-button size="small" class="apv-btn apv-reject" @click="openReject(row)">驳回</el-button>
+            </div>
           </template>
         </el-table-column>
 
         <!-- 待确认归还：确认归还 -->
         <el-table-column v-if="activeTab==='RETURN_PENDING'" label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" @click="doConfirmReturn(row)">确认归还</el-button>
+            <el-button size="small" class="apv-btn apv-confirm" @click="doConfirmReturn(row)">确认归还</el-button>
           </template>
         </el-table-column>
 
         <!-- 已逾期：提醒归还 -->
         <el-table-column v-if="activeTab==='OVERDUE'" label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="warning" @click="doRemind(row)">提醒归还</el-button>
+            <el-button size="small" class="apv-btn apv-remind" @click="doRemind(row)">提醒归还</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -61,7 +63,7 @@
       </el-form>
       <template #footer>
         <el-button @click="rejectDialog.visible = false">取消</el-button>
-        <el-button type="danger" :loading="rejectDialog.loading" @click="doReject">确认驳回</el-button>
+        <el-button class="apv-btn apv-reject" :loading="rejectDialog.loading" @click="doReject">确认驳回</el-button>
       </template>
     </el-dialog>
   </div>
@@ -164,8 +166,99 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ── 审批操作按钮容器 ── */
+.approve-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── 审批按钮基础 ── */
+.apv-btn {
+  min-width: 64px;
+  height: 32px;
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  border: 1px solid;
+  transition: background var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.apv-btn:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
+.apv-btn:active {
+  transform: translateY(1px);
+}
+
+/* ── 通过 ── */
+.apv-pass {
+  color: #5F7E70;
+  background: #EEF5F1;
+  border-color: #CBDDD4;
+}
+
+.apv-pass:hover {
+  background: #E4F0E9;
+  border-color: #B8D2C5;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── 驳回 ── */
+.apv-reject {
+  color: #985D65;
+  background: #F8ECEE;
+  border-color: #E5C8CD;
+}
+
+.apv-reject:hover {
+  background: #F3E2E5;
+  border-color: #D9B6BD;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── 确认归还 ── */
+.apv-confirm {
+  color: #526A9D;
+  background: #EEF2FA;
+  border-color: #CBD6EC;
+}
+
+.apv-confirm:hover {
+  background: #E3EAF7;
+  border-color: #B8C8E2;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── 提醒归还 ── */
+.apv-remind {
+  color: #8E704C;
+  background: #F7F1E9;
+  border-color: #E6D2BA;
+}
+
+.apv-remind:hover {
+  background: #F0E6D8;
+  border-color: #D9C2A3;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── 禁用状态 ── */
+.apv-btn:disabled,
+.apv-btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── 逾期行标记 ── */
 .el-table .row-overdue td {
-  background-color: #fef0f0 !important;
-  border-left: 3px solid #f56c6c;
+  background-color: var(--danger-bg) !important;
+  border-left: 3px solid var(--danger);
 }
 </style>

@@ -1,19 +1,19 @@
 <template>
-  <el-container style="min-height:100vh">
+  <div class="app-shell" :class="{ collapsed: isCollapse }">
     <!-- 侧边栏 -->
-    <el-aside :width="isCollapse?'64px':'240px'" class="aside">
-      <div class="logo" @click="$router.push('/')">
-        <span v-if="!isCollapse">实验室设备管理</span>
-        <span v-else>🔬</span>
+    <aside class="app-sidebar">
+      <div class="sidebar-logo" @click="$router.push('/')">
+        <span v-if="!isCollapse" class="logo-text">实验室设备管理</span>
+        <span v-else class="logo-icon">🔬</span>
       </div>
       <el-menu
         :default-active="activePath"
         :collapse="isCollapse"
-        :collapse-transition="false"
         router
-        text-color="#bfcbd9"
-        active-text-color="#409eff"
-        background-color="#304156"
+        class="sidebar-menu"
+        text-color="var(--sidebar-text)"
+        active-text-color="var(--sidebar-active)"
+        background-color="var(--sidebar-bg)"
       >
         <el-menu-item index="/">
           <el-icon><HomeFilled /></el-icon>
@@ -29,40 +29,44 @@
             <el-menu-item v-for="child in menu.children" :key="child.path"
               :index="child.path">
               {{ child.title }}
-              <span v-if="badgeMap[child.path]" class="menu-badge">{{ badgeMap[child.path] > 99 ? '99+' : badgeMap[child.path] }}</span>
+              <span v-if="badgeMap[child.path]" class="menu-badge">
+                {{ badgeMap[child.path] > 99 ? '99+' : badgeMap[child.path] }}
+              </span>
             </el-menu-item>
           </el-sub-menu>
         </template>
       </el-menu>
-    </el-aside>
+    </aside>
 
-    <!-- 右侧 -->
-    <el-container>
-      <el-header class="header">
-        <div style="display:flex;align-items:center;gap:12px">
-          <el-icon style="cursor:pointer;font-size:20px" @click="isCollapse=!isCollapse">
-            <Fold v-if="!isCollapse" /><Expand v-else />
-          </el-icon>
-          <span style="font-size:16px">{{ userStore.user?.real_name || '未登录' }}，欢迎</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <el-button text @click="showPwdDialog = true">修改密码</el-button>
-          <el-button text @click="doLogout">退出登录</el-button>
-        </div>
-      </el-header>
-      <!-- 面包屑导航 -->
-      <div v-if="breadcrumbs.length > 1" class="breadcrumb-bar">
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path"
-            :to="item.path" style="cursor:pointer">
-            {{ item.title }}
-          </el-breadcrumb-item>
-        </el-breadcrumb>
+    <!-- 顶部栏 -->
+    <header class="app-header">
+      <div class="header-left">
+        <button type="button" class="collapse-btn" @click="isCollapse = !isCollapse"
+          :aria-label="isCollapse ? '展开侧边栏' : '收起侧边栏'">
+          <el-icon :size="20"><Fold v-if="!isCollapse" /><Expand v-else /></el-icon>
+        </button>
+        <span class="header-greeting">{{ userStore.user?.real_name || '未登录' }}，欢迎</span>
       </div>
-      <el-main>
-        <router-view />
-      </el-main>
-    </el-container>
+      <div class="header-right">
+        <el-button text @click="showPwdDialog = true">修改密码</el-button>
+        <el-button text @click="doLogout">退出登录</el-button>
+      </div>
+    </header>
+
+    <!-- 面包屑导航 -->
+    <nav v-if="breadcrumbs.length > 1" class="app-breadcrumb" aria-label="面包屑导航">
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path"
+          :to="item.path" style="cursor:pointer">
+          {{ item.title }}
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="app-main">
+      <router-view />
+    </main>
 
     <!-- 修改密码弹窗 -->
     <el-dialog v-model="showPwdDialog" title="修改密码" width="420px" :close-on-click-modal="false">
@@ -85,7 +89,7 @@
         <el-button type="primary" :loading="pwdLoading" @click="doChangePassword">确认修改</el-button>
       </template>
     </el-dialog>
-  </el-container>
+  </div>
 </template>
 
 <script setup>
@@ -151,10 +155,8 @@ async function fetchBadges() {
   try {
     const res = await request.get('/borrows/pending-count')
     const d = res.data
-    // 审批管理页：pending + return_pending 合计
     const total = (d.pending || 0) + (d.return_pending || 0)
     badgeMap['/borrow/approve'] = total
-    // 我的记录：自己逾期未还的数量
     badgeMap['/borrow/my'] = d.my_overdue || 0
   } catch { /* 静默失败，不影响页面 */ }
 }
@@ -214,18 +216,16 @@ async function doChangePassword() {
     pwdForm.old_password = ''
     pwdForm.new_password = ''
     pwdForm.confirm_password = ''
-    // 退出登录
     userStore.logout()
     router.push('/login')
   } catch { /* request interceptor 已弹 message */ }
   finally { pwdLoading.value = false }
 }
 
-// 页面刷新后重新获取 CSRF Token（JWT 在 localStorage 但 CSRF Token 在内存已丢失）
 onMounted(() => {
   initCsrfToken()
   fetchBadges()
-  badgeTimer = setInterval(fetchBadges, 30000)   // 每30s刷新角标
+  badgeTimer = setInterval(fetchBadges, 30000)
 })
 
 onUnmounted(() => {
@@ -234,14 +234,210 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.aside { background:#304156; }
-.logo { height:60px; display:flex; align-items:center; justify-content:center;
-  color:#fff; font-size:18px; font-weight:bold; cursor:pointer;
-  border-bottom:1px solid rgba(255,255,255,0.1); }
-.header { display:flex; align-items:center; justify-content:space-between;
-  background:#fff; border-bottom:1px solid #e6e6e6; height:60px; }
-.breadcrumb-bar { padding:12px 20px; background:#fff; border-bottom:1px solid #eee; }
-.menu-badge { display:inline-block; background:#f56c6c; color:#fff; font-size:11px;
-  border-radius:10px; padding:0 6px; min-width:18px; height:18px; line-height:18px;
-  text-align:center; margin-left:6px; }
+/* ═══ 布局网格 ═══ */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-rows: var(--header-height) auto minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--app-bg);
+  transition: grid-template-columns var(--duration-normal) var(--ease-out);
+}
+
+.app-shell.collapsed {
+  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
+}
+
+/* ── 侧边栏 ── */
+.app-sidebar {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  background: var(--sidebar-bg);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-dark);
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.logo-text {
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.logo-icon {
+  font-size: 22px;
+}
+
+.sidebar-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: none !important;
+}
+
+.sidebar-menu:deep(.el-menu) {
+  border-right: none;
+}
+
+/* ── 菜单项细调 ── */
+.sidebar-menu :deep(.el-menu-item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 20px !important;
+  margin: 2px 8px;
+  border-radius: var(--radius-sm);
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  transition: color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard);
+}
+
+.sidebar-menu :deep(.el-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 活跃项：浅蓝灰背景 + 白色文字，无左侧竖线 */
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  color: #FFFFFF;
+  background: rgba(229, 237, 250, 0.10);
+  border-radius: 9px;
+}
+
+/* ── 子菜单标题细调 ── */
+.sidebar-menu :deep(.el-sub-menu__title) {
+  padding-left: 20px !important;
+  margin: 2px 8px;
+  border-radius: var(--radius-sm);
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+}
+
+.sidebar-menu :deep(.el-sub-menu__title:hover) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 子菜单内的菜单项缩进 */
+.sidebar-menu :deep(.el-menu--inline .el-menu-item) {
+  padding-left: 48px !important;
+}
+
+/* ── 顶部栏 ── */
+.app-header {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--page-padding);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  min-width: 0;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard);
+}
+
+.collapse-btn:hover {
+  border-color: var(--primary-300);
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.collapse-btn:focus-visible {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
+.header-greeting {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+/* ── 面包屑 ── */
+.app-breadcrumb {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 12px var(--page-padding);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  min-width: 0;
+}
+
+/* ── 主内容 ── */
+.app-main {
+  grid-column: 2;
+  grid-row: 3;
+  padding: var(--page-padding);
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* ── 菜单角标 ── */
+.menu-badge {
+  display: inline-block;
+  background: var(--primary-600);
+  color: var(--text-on-dark);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--el-border-radius-circle);
+  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  margin-left: 6px;
+}
+
+/* ── 菜单滚动条隐藏 ── */
+.sidebar-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell {
+    transition: none;
+  }
+}
 </style>
