@@ -17,7 +17,7 @@
         <el-table-column prop="reject_reason" label="驳回原因" min-width="120" />
         <el-table-column label="操作" width="120">
           <template #default="{ row }">
-            <el-button v-if="row.status==='BORROWED'"
+            <el-button v-if="row.status==='BORROWED' || row.status==='OVERDUE'"
               size="small" type="warning" @click="doReturnApply(row)">申请归还</el-button>
           </template>
         </el-table-column>
